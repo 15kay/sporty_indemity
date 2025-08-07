@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forgot Password</title>
+  <link rel="stylesheet" href="Style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    
+    .container {
+      background-color: white;
+      padding: 3rem;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    h2 {
+      color: #1a1a1a;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .input-group {
+      position: relative;
+      width: 100%;
+    }
+    
+    input[type="email"] {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: #fafafa;
+    }
+    
+    input[type="email"]:focus {
+      outline: none;
+      border-color: #333;
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    button {
+      width: 100%;
+      padding: 1.2rem;
+      background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+    
+    button:hover::before {
+      left: 100%;
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #3a3a3a 0%, #2c2c2c 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .success {
+      color: #2e7d32;
+      text-align: center;
+      padding: 0.8rem;
+      background-color: #e8f5e8;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      font-weight: 500;
+      width: 100%;
+    }
+    
+    .error {
+      color: #d32f2f;
+      text-align: center;
+      padding: 0.8rem;
+      background-color: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 6px;
+      font-weight: 500;
+      width: 100%;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .container {
+        padding: 2rem;
+        max-width: 400px;
+      }
+      
+      h2 {
+        font-size: 1.6rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.4rem;
+      }
+      
+      input[type="email"], button {
+        padding: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Forgot Your Password?</h2>
+    <div class="input-group">
+      <input type="email" id="resetEmail" placeholder="Enter your email" required />
+    </div>
+    <button onclick="sendResetLink()">Send Reset Link</button>
+    <div id="resetMsg" class="success" style="display: none;"></div>
+    <div id="resetError" class="error" style="display: none;"></div>
+  </div>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase credentials
+    const supabaseUrl = 'https://mqvjbgnipsjygmpwidnq.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xdmpiZ25pcHNqeWdtcHdpZG5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIxNDkyNzQsImV4cCI6MjA2NzcyNTI3NH0.p-mZxDCirt9NY_3taGk7_mL-qK5zTR05jInt6FEWs4Y';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function sendResetLink() {
+      const email = document.getElementById("resetEmail").value.trim();
+      const msg = document.getElementById("resetMsg");
+      const err = document.getElementById("resetError");
+
+      msg.textContent = '';
+      err.textContent = '';
+      msg.style.display = 'none';
+      err.style.display = 'none';
+
+      if (!email) {
+        err.textContent = 'Please enter your email address.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://ree0417.github.io/Human_Computer_Interaction/reset.html'
+      });
+
+      if (error) {
+        err.textContent = error.message;
+        err.style.display = 'block';
+      } else {
+        msg.textContent = 'Password reset link sent! Check your email.';
+        msg.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
